@@ -18,9 +18,9 @@ Kiosk mode makes the wall screen show only Valhalla, full screen, from the momen
 3. Right-click the new shortcut → **Properties**. In **Target**, add a space and the word `kiosk` at the very end, so it ends like `start.bat kiosk`.
 4. Set **Run** to **Minimized** (so the black window stays out of the way) → OK.
 
-With `kiosk`, `start.bat` opens Microsoft Edge full screen with nothing but Valhalla. Without it, it opens your normal browser.
+With `kiosk`, Valhalla opens full screen with nothing but Valhalla, in **Brave** if it's installed, otherwise **Google Chrome**. It uses its own small browser profile, so it works even when your normal browser is already open. If neither Brave nor Chrome is installed, it opens your normal browser instead (press **F11** for full screen). Valhalla never uses Microsoft Edge for this.
 
-> To get out of kiosk mode, press **Alt + F4**. To use Chrome instead, open `start.bat` in Notepad and change `msedge --kiosk` to `chrome --kiosk`.
+> To get out of kiosk mode, press **Alt + F4**.
 
 ## 3. Keep the black window
 

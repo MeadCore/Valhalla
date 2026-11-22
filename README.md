@@ -2,7 +2,7 @@
 
 Valhalla follows the Asgard gaming dashboard. It uses the same look and the same "boxes and presets" layout, and it is set up for running the house: cameras, thermostats, garage, lights, a family calendar and a dry-erase board.
 
-**Version 2.0** (adds Govee lights). **Status: design mockup.** It runs on **pretend devices** today, and Govee lights work for real once you have them (tested against a pretend Govee, not yet real lights). No smart-home hardware or software is needed to try it, and nothing in this folder is personal. There are no names, addresses, passwords or tokens, so it is safe to share.
+**Version 2.1** (phone PIN, update check, kiosk without Edge; see [CHANGELOG.md](CHANGELOG.md)). Home: <https://github.com/MeadCore/Valhalla>. **Status: design mockup.** It runs on **pretend devices** today, and Govee lights work for real once you have them (tested against a pretend Govee, not yet real lights). No smart-home hardware or software is needed to try it, and nothing in this folder is personal. There are no names, addresses, passwords or tokens, so it is safe to share.
 
 ## Start here
 
@@ -64,10 +64,12 @@ START-HERE.md             read first: the steps in order
 config.example.json       blank settings, safe to share (start.bat copies it to config.json)
 config.json               YOUR settings, written by the Setup wizard (private, not shared)
 data/board.json           the shared dry-erase board (private, made automatically)
-server.py                 Valhalla's small server (Python standard library only): page, Setup API, board sync, Govee
+server.py                 Valhalla's small server (Python standard library only): page, Setup API, board sync, Govee, phone PIN
+remote_pin.py             phone PIN: salted PIN hash, 5-tries lockout, remembered-phone tokens
 govee.py                  Govee lights: LAN control + Govee cloud, caching and rate limits
 tools/govee_mock.py       pretend Govee (cloud + LAN lights) for testing; tools/test_govee.py runs the checks
-start.bat / start.sh      one-click start ("start.bat kiosk" opens Edge full screen)
+tools/test_pin.py         phone PIN checks; tools/test_updates.js update-check checks; tools/test_kiosk.py kiosk browser checks
+start.bat / start.sh      one-click start ("start.bat kiosk" opens Brave or Chrome full screen, never Edge)
 static/index.html         the page
 static/styles.css         look and layout (same style as Asgard)
 static/app.js             boxes, presets, scene picker, board + sync, Setup wizard, Help panel
@@ -136,3 +138,13 @@ Remote access: **Tailscale** (free) or **Home Assistant Cloud** (paid). **Never 
 - No names, addresses, hometown, e-mail addresses, passwords, tokens or API keys in any shared file.
 - `config.json`, `config.backup.json` and `data/` are private and listed in `.gitignore`. Share `config.example.json` instead.
 - Phones never receive the wall screen's token; they sign in with Home Assistant's own login.
+- The phone PIN is never stored, only a salted PBKDF2 hash in `config.json`; remembered phones are stored as hashes too.
+
+## Updates
+
+❔ Help → **About & updates** shows the version and checks [GitHub releases](https://github.com/MeadCore/Valhalla/releases) for a newer one (nothing is downloaded or installed). "Check automatically" is off by default and checks at most twice a day.
+
+## Credits
+
+Created October 26, 2026 by The_Mead_Maker & Odin.
+Copyright (c) 2026 The_Mead_Maker & Odin. Released under the [MIT License](LICENSE).

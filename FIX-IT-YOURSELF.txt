@@ -5,7 +5,7 @@ Valhalla is the page at  http://127.0.0.1:8795  (type that into your web browser
 
 Where Valhalla lives
 --------------------
-- Installed with Valhalla-Setup-2.0.0.exe: the program is in %LOCALAPPDATA%\Programs\Valhalla and your
+- Installed with Valhalla-Setup-2.1.0.exe: the program is in %LOCALAPPDATA%\Programs\Valhalla and your
   settings (config.json = Govee key and other settings, data folder = the board, valhalla.log) are in
   %APPDATA%\Valhalla.   (Paste either of those into the File Explorer address bar to open it.)
 - Running from a folder (start.bat): the program AND your settings are in that folder.
@@ -62,13 +62,35 @@ Where Valhalla lives
       running on this PC. Close it, or just use the cloud.
 
 
-5. START OVER / REINSTALL
+5. FORGOT THE PHONE PIN / A PHONE IS LOST / A PHONE KEEPS ASKING FOR THE PIN
+--------------------------------------------------------------------------
+   Phones that open Valhalla over Tailscale type the phone PIN once, then they're remembered.
+   The wall-screen PC itself never needs it.
+   - Forgot the PIN: on the wall-screen PC click the gear (Setup) > Phones & board. Type a NEW PIN (4 to 8 digits)
+     in "Phone PIN" and press "Save & next". Every phone is signed out and types the new PIN once.
+   - Lost a phone: same thing (a new PIN), or press "Sign out all phones" to keep the same PIN.
+     Also remove the lost phone in the Tailscale admin page.
+   - "Too many wrong PINs": 5 wrong tries lock PIN entry for 5 minutes. Wait 5 minutes and try again.
+   - A phone asks again: it was signed out (new PIN or "Sign out all phones"), its browser data was cleared,
+     or it's been about 6 months. Just type the PIN again.
+   - A phone shows "Phone access is locked until a phone PIN is set": no PIN has been set yet - set one as above.
+
+
+6. THE WALL SCREEN (FULL SCREEN) SHORTCUT
+----------------------------------------
+   "Valhalla (wall screen, full screen)" opens in Brave, or in Chrome if there's no Brave. It never uses Edge.
+   If neither is installed it opens your normal browser - press F11 for full screen.
+   To get out of full screen: Alt + F4.
+
+
+7. START OVER / REINSTALL
 -------------------------
-   - Run Valhalla-Setup-2.0.0.exe again (it's also in your backup zip). It keeps your settings.
+   - Run Valhalla-Setup-2.1.0.exe again (it's also in your backup zip). It keeps your settings.
    - Truly fresh start: Quit Valhalla (icon by the clock), uninstall it (Settings > Apps), rename
      %APPDATA%\Valhalla to Valhalla-old, then install again. The Setup wizard opens; paste your Govee key again.
    - To bring old settings back: Quit Valhalla, copy your saved config.json (and the data folder) into
      %APPDATA%\Valhalla, start Valhalla.
+   - The phone PIN and remembered phones are kept in config.json too (as scrambled hashes, never the PIN itself).
    - Settings saved wrong? Setup keeps the previous version as config.backup.json in the settings folder.
      Quit Valhalla, rename config.json to config.broken.json, copy config.backup.json and rename the copy to
      config.json, then start Valhalla.
@@ -79,4 +101,4 @@ Still stuck?
 Write down: what you clicked, what you expected, what happened, and the time. The log file valhalla.log in
 the settings folder (open with Notepad) shows what Valhalla was doing at that time.
 
-Valhalla - built by The_Mead_Maker & Odin
+Created October 26, 2026 by The_Mead_Maker & Odin

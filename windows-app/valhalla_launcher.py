@@ -5,7 +5,8 @@
 - Settings (config.json), the board (data/) and valhalla.log go to %APPDATA%\\Valhalla, so the program folder can stay
   read-only. Portable mode: if a config.json or portable.txt sits next to Valhalla.exe, they stay there instead.
 - "--background" (used by "Start Valhalla with Windows"): server + tray icon, no browser.
-- "--kiosk": open Valhalla full screen in Microsoft Edge (the wall touchscreen).
+- "--kiosk": open Valhalla full screen (the wall touchscreen) in Brave if it is installed, else Google Chrome, each with
+  its own small kiosk profile in the settings folder; otherwise the default browser, normally. Never Microsoft Edge.
 Test-only overrides: VALHALLA_PORT, VALHALLA_NO_BROWSER=1, VALHALLA_TEST_BROWSER (JSON argv list), VALHALLA_DATA_DIR.
 """
 import json
@@ -29,6 +30,25 @@ def data_dir():
     if sys.platform == "win32" and os.environ.get("APPDATA"):
         return os.path.join(os.environ["APPDATA"], "Valhalla")
     return BASE
+
+
+def kiosk_browser():
+    """Path to Brave, else Chrome, else None. Microsoft Edge is never used for kiosk mode."""
+    env = os.environ.get("VALHALLA_KIOSK_BROWSER", "").strip()  # test/override hook (an exe path)
+    if env:
+        return env if os.path.isfile(env) and "msedge" not in env.lower() else None
+    roots = [os.environ.get(k, "") for k in ("PROGRAMFILES", "PROGRAMFILES(X86)", "LOCALAPPDATA")]
+    for rel in (("BraveSoftware", "Brave-Browser", "Application", "brave.exe"), ("Google", "Chrome", "Application", "chrome.exe")):
+        for r in roots:
+            if r and os.path.isfile(os.path.join(r, *rel)):
+                return os.path.join(r, *rel)
+    return None
+
+
+def kiosk_command(exe, url, home):
+    """Chromium kiosk with a separate profile, so it opens full screen even when the normal browser is already open."""
+    return [exe, "--kiosk", url, "--no-first-run", "--no-default-browser-check", "--disable-session-crashed-bubble",
+            "--user-data-dir=" + os.path.join(home, "kiosk-browser")]
 
 
 def _alive(port):
@@ -65,11 +85,14 @@ def main():
 
     def show():
         if "--kiosk" in args:
-            try:
-                subprocess.Popen(["msedge", "--kiosk", url, "--edge-kiosk-type=fullscreen", "--no-first-run"], shell=False)
-                return
-            except OSError:
-                pass
+            exe = kiosk_browser()
+            if exe:
+                try:
+                    subprocess.Popen(kiosk_command(exe, url, home), shell=False)
+                    return
+                except OSError:
+                    pass
+            print("Kiosk: Brave or Chrome not found; opening the default browser instead (press F11 for full screen).")
         webbrowser.open(url)
 
     if _alive(port):  # already running: don't start a second server

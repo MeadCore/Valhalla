@@ -19,10 +19,19 @@ Tailscale makes a private network just for your own devices. Your phone in anoth
 
 1. On the wall-screen PC, find its Tailscale address (the Tailscale icon shows it; it starts with `100.`).
 2. On that PC, open Valhalla → **⚙** → **Phones & board** ([open it](#setup:remote)).
-3. Paste the address into "Let phones reach Valhalla over Tailscale".
-4. Paste Home Assistant's Tailscale name into "Home Assistant's Tailscale address".
-5. Save, then restart Valhalla (close the black window, run `start.bat` again).
-6. On a phone with Tailscale on, open `http://wall-pc-name.your-tailnet.ts.net:8795` (use the PC's MagicDNS name). Add it to your home screen.
+3. Type a **Phone PIN** (4 to 8 digits). Valhalla won't save the Tailscale address until a PIN is set.
+4. Paste the address into "Let phones reach Valhalla over Tailscale".
+5. Paste Home Assistant's Tailscale name into "Home Assistant's Tailscale address".
+6. Save, then restart Valhalla (close the black window, run `start.bat` again, or Quit Valhalla from the tray icon and start it again).
+7. On a phone with Tailscale on, open `http://wall-pc-name.your-tailnet.ts.net:8795` (use the PC's MagicDNS name). Type the PIN once; the phone is remembered after that. Add it to your home screen.
+
+### The phone PIN
+
+- Every phone or tablet types the PIN once. After that it's remembered (for about 6 months) with a cookie that only works for that phone.
+- **5 wrong PINs lock PIN entry for 5 minutes.**
+- The wall-screen PC itself never needs the PIN.
+- Valhalla never saves the PIN itself, only a scrambled (salted hash) version in `config.json`.
+- **Forgot the PIN, or lost a phone?** On the wall-screen PC: **⚙ → Phones & board**, type a new PIN and press **Save & next**. That signs every phone out; each one types the new PIN once. To sign phones out but keep the PIN, press **Sign out all phones**.
 
 Valhalla only listens on this computer and on that Tailscale address. It refuses to listen on your whole home network or the internet. Phones sign in with Home Assistant's own login page. The wall screen's token is never sent to them, and the ⚙ Setup can only be changed on the wall-screen PC.
 

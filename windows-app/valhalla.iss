@@ -1,7 +1,7 @@
 ; Valhalla per-user installer (Inno Setup 6). No admin needed; installs to %LOCALAPPDATA%\Programs\Valhalla.
 ; Built by The_Mead_Maker & Odin, the same way as Asgard's installer.
 #ifndef AppVer
-  #define AppVer "2.0.0"
+  #define AppVer "2.1.0"
 #endif
 [Setup]
 AppId={{8B16942A-86B6-48DB-A598-3506C101623B}
@@ -35,11 +35,11 @@ Name: autostart; Description: "Start Valhalla with &Windows (in the tray, withou
 
 [Files]
 ; Never ship user data, even if a test run left some in dist\Valhalla.
-Source: "dist\Valhalla\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion; Excludes: "config.json,config.backup.json,config.json.tmp,data,valhalla.log*,portable.txt"
+Source: "dist\Valhalla\*"; DestDir: "{app}"; Flags: recursesubdirs ignoreversion; Excludes: "config.json,config.backup.json,config.json.tmp,data,kiosk-browser,valhalla.log*,portable.txt"
 
 [Icons]
 Name: "{userprograms}\Valhalla"; Filename: "{app}\Valhalla.exe"; Comment: "Valhalla home command center"
-Name: "{userprograms}\Valhalla (wall screen, full screen)"; Filename: "{app}\Valhalla.exe"; Parameters: "--kiosk"; Comment: "Valhalla full screen in Microsoft Edge"
+Name: "{userprograms}\Valhalla (wall screen, full screen)"; Filename: "{app}\Valhalla.exe"; Parameters: "--kiosk"; Comment: "Valhalla full screen (Brave or Chrome)"
 Name: "{userdesktop}\Valhalla"; Filename: "{app}\Valhalla.exe"; Comment: "Valhalla home command center"; Tasks: desktopicon
 
 [Registry]

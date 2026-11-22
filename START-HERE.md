@@ -8,7 +8,7 @@ Valhalla is the home command center for the wall touchscreen: cameras, thermosta
 
 - A Windows PC for the screen (a mini PC is fine), plugged in with Ethernet.
 - **Python 3** (free). Get it from [python.org](https://www.python.org/downloads/). During install, tick **"Add python.exe to PATH"**.
-  - Or skip Python: run **Valhalla-Setup-2.0.0.exe**. It installs Valhalla like Asgard (Start menu, tray icon, no black window). Your settings then live in `%APPDATA%\Valhalla`.
+  - Or skip Python: run **Valhalla-Setup-2.1.0.exe**. It installs Valhalla like Asgard (Start menu, tray icon, no black window). Your settings then live in `%APPDATA%\Valhalla`.
 - Later: a **Home Assistant** box. It is the "brain" that actually talks to the cameras, thermostats, garage door and lights. Valhalla is just the pretty screen in front of it.
 
 ## Try it today (5 minutes)

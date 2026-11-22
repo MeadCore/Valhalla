@@ -441,3 +441,4 @@ button { font: inherit; color: inherit; touch-action: manipulation; }
 .cp-scenes { display: flex; flex-wrap: wrap; gap: 6px; max-height: 220px; overflow: auto; }
 .cp-scene { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line2); background: var(--panel2); color: inherit; cursor: pointer; font: inherit; font-size: 13px; }
 .cp-scene:hover { border-color: var(--accent); }
+.upd-notes { white-space: pre-wrap; font: inherit; font-size: 14px; background: var(--panel3); border-radius: 10px; padding: 10px 12px; max-height: 220px; overflow: auto; }

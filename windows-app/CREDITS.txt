@@ -1,10 +1,12 @@
 Valhalla - Credits
 ==================
 
-Valhalla is the home command center built by The_Mead_Maker & Odin on Asgard's layout.
-First version: October 26, 2026. Version 2.0 (Govee lights): November 20, 2026.
+Created October 26, 2026 by The_Mead_Maker & Odin
 
-Copyright (c) 2026 The_Mead_Maker & Odin.
+Valhalla is the home command center built by The_Mead_Maker & Odin on Asgard's layout.
+Version 2.0 (Govee lights): November 20, 2026. Version 2.1 (phone PIN, update check): November 22, 2026.
+
+Copyright (c) 2026 The_Mead_Maker & Odin. Released under the MIT License (see LICENSE).
 
 Valhalla.exe is built with PyInstaller, pystray and Pillow; the installer with Inno Setup.
 Govee is a trademark of its owner; Valhalla uses Govee's public Developer API and LAN API.

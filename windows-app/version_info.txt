@@ -1,16 +1,16 @@
 VSVersionInfo(
-  ffi=FixedFileInfo(filevers=(2, 0, 0, 0), prodvers=(2, 0, 0, 0), mask=0x3f, flags=0x0, OS=0x40004, fileType=0x1, subtype=0x0, date=(0, 0)),
+  ffi=FixedFileInfo(filevers=(2, 1, 0, 0), prodvers=(2, 1, 0, 0), mask=0x3f, flags=0x0, OS=0x40004, fileType=0x1, subtype=0x0, date=(0, 0)),
   kids=[
     StringFileInfo([StringTable('040904B0', [
       StringStruct('CompanyName', 'The_Mead_Maker & Odin'),
       StringStruct('FileDescription', 'Valhalla - home command center'),
-      StringStruct('FileVersion', '2.0.0.0'),
+      StringStruct('FileVersion', '2.1.0.0'),
       StringStruct('InternalName', 'Valhalla'),
       StringStruct('LegalCopyright', 'Copyright (c) 2026 The_Mead_Maker & Odin'),
       StringStruct('OriginalFilename', 'Valhalla.exe'),
       StringStruct('ProductName', 'Valhalla'),
-      StringStruct('ProductVersion', '2.0.0.0'),
-      StringStruct('Comments', 'Built by The_Mead_Maker & Odin, on the Asgard layout')])]),
+      StringStruct('ProductVersion', '2.1.0.0'),
+      StringStruct('Comments', 'Created October 26, 2026 by The_Mead_Maker & Odin')])]),
     VarFileInfo([VarStruct('Translation', [1033, 1200])])
   ]
 )

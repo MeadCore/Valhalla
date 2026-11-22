@@ -12,6 +12,11 @@
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage full or blocked */ } },
   };
   const Q = new URLSearchParams(location.search);
+  // The one place the screen's version lives (❔ Help › About & updates compares it with the latest GitHub release).
+  const VALHALLA_VERSION = "2.1.0";
+  // GitHub "owner/repo" whose latest release is checked (https://api.github.com/repos/MeadCore/Valhalla/releases/latest).
+  const UPDATE_REPO = "MeadCore/Valhalla";
+  const CREDIT = "Created October 26, 2026 by The_Mead_Maker & Odin";
   let toastTimer = null;
   function toast(msg, isErr) {
     const t = $("toast"); t.textContent = msg; t.className = "toast" + (isErr ? " err" : "");
@@ -597,18 +602,109 @@
     }
     return out.join("\n");
   }
+  // ======================================================================
+  // UPDATES (❔ Help › About & updates): compares VALHALLA_VERSION with the latest release of UPDATE_REPO on GitHub
+  // (public API, no sign-in, straight from the browser). Never downloads or installs anything: it shows the release
+  // notes and a link. "Check automatically" (vh_opts.updAuto, off by default) checks at most every 12 h.
+  // Last result cached in vh_update_last = {state: new|latest|none|error, latest, name, notes, url, at, cur}.
+  // ======================================================================
+  const updates = {
+    KEY: "vh_update_last", busy: false,
+    api() { return "https://api.github.com/repos/" + UPDATE_REPO + "/releases/latest"; },
+    page() { return "https://github.com/" + UPDATE_REPO + "/releases/latest"; },
+    parse(v) { return String(v || "").trim().replace(/^v/i, "").split(/[.\-+ ]/).slice(0, 3).map((x) => parseInt(x, 10) || 0); },
+    newer(a, b) {
+      const x = updates.parse(a), y = updates.parse(b);
+      for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0);
+      return false;
+    },
+    opts() { const o = store.get("vh_opts", {}); return o && typeof o === "object" ? o : {}; },
+    last() { const l = store.get(updates.KEY, null); return l && typeof l === "object" ? l : null; },
+    ago(t) {
+      const m = Math.round((Date.now() - (+t || 0)) / 60000);
+      return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago";
+    },
+    describe(l) {
+      if (updates.busy) return "Checking GitHub…";
+      if (!l) return "Not checked yet.";
+      const when = ' <span class="muted">· checked ' + updates.ago(l.at) + "</span>";
+      if (l.state === "error") return "Couldn't check right now. Try again later." + when;
+      if (l.state === "none") return "You're on the latest version (no release published yet)." + when;
+      if (l.state === "latest" || !updates.newer(l.latest, VALHALLA_VERSION)) return "You're on the latest version." + when;
+      const link = /^https:\/\/github\.com\//.test(l.url || "") ? l.url : updates.page();
+      return '<b class="ok-text">Valhalla ' + esc(l.latest) + " is available</b> (you have " + esc(VALHALLA_VERSION) + ")." + when +
+        (l.name && l.name.replace(/^v/i, "") !== l.latest ? "<div>" + esc(l.name) + "</div>" : "") +
+        (l.notes ? '<pre class="upd-notes">' + esc(l.notes) + "</pre>" : "") +
+        '<a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">See what\'s new on GitHub ↗</a>';
+    },
+    paint() { const el = $("updStatus"); if (el) el.innerHTML = updates.describe(updates.last()); const b = $("updCheck"); if (b) b.disabled = updates.busy; },
+    async check() {
+      updates.busy = true; updates.paint();
+      let res = { state: "error" };
+      try {
+        const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+        const t = ctl ? setTimeout(() => ctl.abort(), 10000) : 0;
+        const r = await fetch(updates.api(), { headers: { Accept: "application/vnd.github+json" }, cache: "no-store", credentials: "omit",
+          referrerPolicy: "no-referrer", signal: ctl ? ctl.signal : undefined });
+        clearTimeout(t);
+        if (r.status === 404) res = { state: "none" };
+        else if (r.ok) {
+          const d = await r.json().catch(() => null);
+          const tag = String((d && (d.tag_name || d.name)) || "").trim();
+          if (tag && /^v?\d+(\.\d+){0,2}\b/i.test(tag)) res = { state: updates.newer(tag, VALHALLA_VERSION) ? "new" : "latest", latest: tag.replace(/^v/i, "").slice(0, 40),
+            name: String(d.name || "").slice(0, 120), notes: String(d.body || "").trim().slice(0, 1500), url: String(d.html_url || "") };
+          else res = { state: "none" };
+        }
+      } catch (e) { res = { state: "error" }; }
+      res.at = Date.now(); res.cur = VALHALLA_VERSION;
+      store.set(updates.KEY, res);
+      updates.busy = false; updates.paint();
+      return res;
+    },
+    startup() {
+      if (!updates.opts().updAuto) return;
+      const l = updates.last();
+      if (l && l.cur === VALHALLA_VERSION && l.state !== "error" && Date.now() - (+l.at || 0) < 12 * 3600 * 1000) return;
+      setTimeout(async () => {
+        const r = await updates.check();
+        if (r.state === "new") toast("Valhalla " + r.latest + " is available: ❔ Help › About & updates");
+      }, 5000);
+    },
+    about() {
+      return "<h2>ℹ About Valhalla</h2><p><b>Valhalla " + esc(VALHALLA_VERSION) + "</b>, the home command center.</p>" +
+        "<p>" + esc(CREDIT) + ".<br>Copyright (c) 2026 The_Mead_Maker &amp; Odin. Released under the MIT License (see <code>LICENSE</code>).</p>" +
+        '<p><a href="https://github.com/' + UPDATE_REPO + '" target="_blank" rel="noopener noreferrer">github.com/' + UPDATE_REPO + " ↗</a></p>" +
+        "<h3>Updates</h3><p id=\"updStatus\">" + updates.describe(updates.last()) + "</p>" +
+        '<p><button type="button" class="btn small" id="updCheck">Check for updates</button></p>' +
+        '<label class="wz-check"><input type="checkbox" id="updAuto"' + (updates.opts().updAuto ? " checked" : "") + "> Check automatically when Valhalla opens (at most twice a day)</label>" +
+        '<p class="muted tiny">Checking only asks GitHub which version is newest. Nothing is downloaded or installed; to update, run the new Valhalla-Setup from the release page.</p>';
+    },
+  };
+
   const help = {
     open(id) {
       const html = '<div class="help-head"><h3 id="modalTitle">❔ Help &amp; how-to guides</h3><button type="button" class="btn small ghost" data-close>Close ✕</button></div>' +
         '<div class="help-wrap"><nav class="help-list" aria-label="Guides">' + GUIDES.map(([g, ic, t, sub], n) =>
           '<button type="button" class="help-item" data-guide="' + g + '"><span class="hi-num">' + (n ? n : "★") + '</span><span class="hi-ic" aria-hidden="true">' + ic + '</span><span><b>' + esc(t) + "</b><small>" + esc(sub) + "</small></span></button>").join("") +
+        '<button type="button" class="help-item" data-about="1"><span class="hi-num">ℹ</span><span class="hi-ic" aria-hidden="true"></span><span><b>About &amp; updates</b><small>Version ' + esc(VALHALLA_VERSION) + ", credits, check for updates</small></span></button>" +
         '<button type="button" class="help-item setup-link js-open-setup" data-step="welcome"><span class="hi-num">⚙</span><span class="hi-ic"></span><span><b>Open the Setup wizard</b><small>Save your settings step by step</small></span></button>' +
         '</nav><article class="help-doc" id="helpDoc" tabindex="-1"></article></div>';
       openModal(html, "help-modal");
-      $("modalBox").addEventListener("click", (e) => { const a = e.target.closest("[data-guide]"); if (a) { e.preventDefault(); this.show(a.dataset.guide); } });
+      $("modalBox").addEventListener("click", (e) => {
+        const a = e.target.closest("[data-guide]"); if (a) { e.preventDefault(); this.show(a.dataset.guide); return; }
+        if (e.target.closest("[data-about]")) { e.preventDefault(); this.show("about"); return; }
+        if (e.target.id === "updCheck") updates.check();
+      });
+      $("modalBox").addEventListener("change", (e) => { if (e.target.id === "updAuto") { const o = updates.opts(); o.updAuto = e.target.checked; store.set("vh_opts", o); } });
       this.show(id || store.get("vh_help_last", "start-here"));
     },
     async show(id) {
+      document.querySelectorAll(".help-item[data-about]").forEach((b) => b.classList.toggle("on", id === "about"));
+      if (id === "about") {
+        document.querySelectorAll(".help-item[data-guide]").forEach((b) => b.classList.remove("on"));
+        const d = $("helpDoc"); if (d) { d.innerHTML = updates.about(); d.scrollTop = 0; }
+        return;
+      }
       const g = GUIDES.find((x) => x[0] === id) || GUIDES[0]; store.set("vh_help_last", g[0]);
       document.querySelectorAll(".help-item[data-guide]").forEach((b) => b.classList.toggle("on", b.dataset.guide === g[0]));
       const doc = $("helpDoc"); if (!doc) return;
@@ -645,13 +741,13 @@
       const d = {
         adapter: CFG.adapter || "mock", ha_url: CFG.haUrl || "", ha_token: "", calendars: CFG.calendars || ["calendar.house"], weather_entity: CFG.weather || "weather.home",
         default_preset: CFG.defaultPreset || "home", default_scene: CFG.defaultScene || "auto", norse_days: CFG.norse !== false, board_sync: CFG.boardSync !== false,
-        remote_listen: "", ha_remote_url: "", listen_port: 8795, setup_done: !!CFG.setupDone, _tokenMask: "",
+        remote_listen: "", ha_remote_url: "", listen_port: 8795, setup_done: !!CFG.setupDone, _tokenMask: "", _pinSet: false, _pinPhones: 0,
         govee_enabled: !!CFG.govee, govee_lan: true, govee_lan_ips: [], govee_builtin_scenes: false, _goveeMask: "",
       };
       if (this.server && this.local) {
         try {
           const r = await (await fetch("api/setup/status", { cache: "no-store" })).json();
-          Object.entries(r.keys || {}).forEach(([k, v]) => { if (k === "ha_token") d._tokenMask = v.value; else if (k === "govee_api_key") d._goveeMask = v.value; else d[k] = v.value; });
+          Object.entries(r.keys || {}).forEach(([k, v]) => { if (k === "remote_pin") { d._pinSet = !!v.set; d._pinPhones = +v.devices || 0; } else if (k === "ha_token") d._tokenMask = v.value; else if (k === "govee_api_key") d._goveeMask = v.value; else d[k] = v.value; });
         } catch (e) { /* keep defaults */ }
       }
       this.vals = d;
@@ -717,6 +813,10 @@
         '<p class="wz-hint">The board is stored on the Valhalla computer, and each stroke shows up live everywhere. ' + this.guide("board-sync", "How board sync works") + "</p>" +
         (this.server ? this.field("remote_listen", "Let phones reach Valhalla over Tailscale (optional)", this.text("remote_listen", "100.x.y.z  (leave blank for this computer only)"),
           "Paste this computer's Tailscale address. Only devices signed in to your own Tailscale can reach it. Takes effect after you restart Valhalla.") +
+          (this.local ? this.field("remote_pin", "Phone PIN (4 to 8 digits)", '<input class="wz-input" data-k="remote_pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="new-password" placeholder="' + (v._pinSet ? "PIN is set ✓ (type a new one to change it)" : "Pick a PIN phones must type once") + '">',
+            "Needed before phones can open Valhalla. Each phone types it once and is then remembered. 5 wrong tries lock PIN entry for 5 minutes. This computer never needs it. " +
+            "Typing a new PIN signs every phone out. " + (v._pinSet ? "<b>" + v._pinPhones + " phone" + (v._pinPhones === 1 ? "" : "s") + " remembered.</b>" : "<b>No PIN yet: phones are locked out.</b>")) +
+            (v._pinSet ? '<p><button type="button" class="btn small ghost" data-act="forget-phones">Sign out all phones</button> <span class="wz-test" id="wzPin"></span></p>' : "") : "") +
           this.field("ha_remote_url", "Home Assistant's Tailscale address (for phones)", this.text("ha_remote_url", "http://homeassistant.your-tailnet.ts.net:8123"),
           "Phones away from home use this instead of the home-network address. Phones sign in with Home Assistant's own login, never the wall screen's token.") : "") +
         '<div class="wz-card warn"><b>🚫 Never forward ports on your router</b><span>Remote access goes through Tailscale (free) or Home Assistant Cloud (paid), so nothing in your house is open to the internet.</span></div>' +
@@ -728,7 +828,7 @@
         (this.server ? "<li><span>Govee lights</span><b>" + (v.govee_enabled ? "on" + (v.govee_lan ? " · LAN" : "") + (v._goveeMask || v.govee_api_key ? " · cloud key saved" : "") : "off") + "</b></li>" : "") +
         "<li><span>Start-up layout / colors</span><b>" + esc(v.default_preset) + " / " + esc(v.default_scene) + (v.norse_days ? " (with Norse days)" : "") + "</b></li>" +
         "<li><span>Board</span><b>" + (v.board_sync ? "shared live" : "this screen only") + "</b></li>" +
-        (this.server ? "<li><span>Phones over Tailscale</span><b>" + (v.remote_listen ? esc(v.remote_listen) : "off") + "</b></li>" : "") + "</ul>" +
+        (this.server ? "<li><span>Phones over Tailscale</span><b>" + (v.remote_listen ? esc(v.remote_listen) + (v._pinSet ? " · PIN on" : " · no PIN yet") : "off") + "</b></li>" : "") + "</ul>" +
         '<p class="muted tiny">Finish reloads the screen with the new settings. Change anything later with the ⚙ button.</p>';
       return "";
     },
@@ -749,6 +849,7 @@
       if (typeof out.govee_lan_ips === "string") out.govee_lan_ips = out.govee_lan_ips.split(",").map((x) => x.trim()).filter(Boolean);
       if ("ha_token" in out && !out.ha_token) delete out.ha_token; // blank = keep the saved one
       if ("govee_api_key" in out && !out.govee_api_key) delete out.govee_api_key;
+      if ("remote_pin" in out && !out.remote_pin) delete out.remote_pin;
       return out;
     },
     async save(id) {
@@ -756,6 +857,13 @@
       const got = Object.assign({}, this.collect()); if (id === "mode") got.adapter = this.vals.adapter; if (id === "done") got.setup_done = true;
       const body = {}; ks.forEach((k) => { if (k in got) body[k] = got[k]; });
       $("wizard").querySelectorAll("[data-err]").forEach((e) => { e.textContent = ""; });
+      if (this.server && id === "remote" && got.remote_pin) { // the PIN goes first (phones need it before the Tailscale address is saved)
+        const pr = await fetch("api/setup/pin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin: got.remote_pin }) });
+        const pj = await pr.json().catch(() => ({ ok: false, errors: { remote_pin: "No answer from the Valhalla server." } }));
+        const pe = $("wizard").querySelector('[data-err="remote_pin"]');
+        if (!pj.ok) { if (pe) pe.textContent = (pj.errors && pj.errors.remote_pin) || "Couldn't save the PIN."; return false; }
+        this.vals._pinSet = true; this.vals._pinPhones = 0; toast(pj.message || "Phone PIN saved.");
+      }
       if (this.server) {
         const r = await fetch("api/setup/config", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
         const j = await r.json().catch(() => ({ ok: false, errors: { _: "No answer from the Valhalla server." } }));
@@ -798,6 +906,12 @@
       const s = STEPS[this.i];
       if (b.dataset.act === "test") return this.test();
       if (b.dataset.act === "test-govee") return this.testGovee();
+      if (b.dataset.act === "forget-phones") {
+        const j = await (await fetch("api/setup/forget-phones", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })).json().catch(() => ({ ok: false }));
+        if (j.ok) this.vals._pinPhones = 0;
+        const o = $("wzPin"); if (o) { o.className = "wz-test " + (j.ok ? "ok" : "bad"); o.textContent = j.ok ? "✓ " + j.message : "✗ Couldn't sign the phones out."; }
+        return;
+      }
       if (b.dataset.act === "back") { this.i--; return this.render(); }
       if (b.dataset.act === "skip") { this.i++; return this.render(); }
       if (b.dataset.act === "next") {
@@ -860,6 +974,8 @@
     $("setupBtn").classList.toggle("needs", !CFG.setupDone);
     if (Q.get("open") === "setup") setup.open(Q.get("step") || "welcome");
     if (Q.get("open") === "help") help.open(Q.get("guide") || "start-here");
+    if (Q.get("open") === "about") help.open("about");
+    updates.startup();
     $("fsBtn").addEventListener("click", () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); });
   }
 

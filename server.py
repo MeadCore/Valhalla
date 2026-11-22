@@ -12,9 +12,12 @@ What it does
     govee.py. The Govee API key stays in this program; browsers (even this computer's) never get it.
 
 Who can reach it
-  * Always 127.0.0.1 (this computer).
+  * Always 127.0.0.1 (this computer). This computer never needs a PIN.
   * Optionally ALSO a Tailscale address (100.x.y.z), set in Setup > Remote. Only your own Tailscale devices can
     reach that address. Never 0.0.0.0, never a router port forward.
+  * Every other device needs the phone PIN once (remote_pin.py): only a salted hash of the PIN is kept in
+    config.json, 5 wrong tries lock PIN entry for 5 minutes, and a phone that got it right is remembered with a
+    random token cookie (only a hash of it is saved). Setting a new PIN on this computer forgets every phone.
 """
 import ipaddress
 import json
@@ -32,8 +35,9 @@ import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import govee
+import remote_pin
 
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 BASE = os.path.dirname(os.path.abspath(__file__))
 # Where settings and the board live. Normally this folder; the Windows app (Valhalla.exe) points it at
 # %APPDATA%\Valhalla with VALHALLA_DATA_DIR so the program folder can stay read-only (see appdata.py).
@@ -126,6 +130,8 @@ def save_config(changes):
             errors[k] = msg
         else:
             clean[k] = v
+    if clean.get("remote_listen") and not load_config().get("remote_pin_hash"):
+        errors["remote_listen"] = "Set a phone PIN first (the Phone PIN box on this step), so phones have to type it."
     if errors:
         return {"ok": False, "errors": errors}
     with LOCK:
@@ -145,6 +151,43 @@ def save_config(changes):
     return {"ok": True, "saved": sorted(clean), "restart": any(k in clean for k in RESTART_KEYS)}
 
 
+def update_private(fn):
+    """Change keys that the Setup form never sends directly (the PIN hash, remembered phones). fn(cur) edits cur."""
+    with LOCK:
+        try:
+            with open(CONFIG, encoding="utf-8-sig") as f:
+                cur = json.load(f)
+        except (FileNotFoundError, ValueError):
+            cur = {}
+        fn(cur)
+        tmp = CONFIG + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(cur, f, indent=2)
+            f.write("\n")
+        os.replace(tmp, CONFIG)
+
+
+def set_pin(pin):
+    if not remote_pin.valid_pin(pin):
+        return {"ok": False, "errors": {"remote_pin": "A phone PIN is 4 to 8 digits (numbers only)."}}
+    h = remote_pin.hash_pin(pin)
+
+    def fn(cur):
+        cur["remote_pin_hash"] = h
+        cur["remote_devices"] = []  # a new PIN signs every phone out
+    update_private(fn)
+    PIN_LOCK.succeeded()
+    return {"ok": True, "message": "Phone PIN saved. Phones type it once more."}
+
+
+def forget_devices():
+    update_private(lambda cur: cur.__setitem__("remote_devices", []))
+    return {"ok": True, "message": "Every phone is signed out. They type the PIN again next time."}
+
+
+PIN_LOCK = remote_pin.Lockout()
+
+
 def masked_status(cfg):
     keys = {}
     for k in VALIDATORS:
@@ -153,6 +196,7 @@ def masked_status(cfg):
             keys[k] = {"set": bool(v), "value": ("••••" + v[-4:]) if v else ""}
         else:
             keys[k] = {"set": v not in ("", None, []), "value": v}
+    keys["remote_pin"] = {"set": bool(cfg.get("remote_pin_hash")), "value": "", "devices": len(cfg.get("remote_devices") or [])}
     return {"ok": True, "keys": keys}
 
 
@@ -161,7 +205,7 @@ def public_config(cfg, local):
         "server": True, "adapter": cfg["adapter"], "haUrl": (cfg["ha_url"] if local or not cfg.get("ha_remote_url") else cfg["ha_remote_url"]), "calendars": cfg["calendars"],
         "weather": cfg["weather_entity"] or "weather.home", "defaultPreset": cfg["default_preset"],
         "defaultScene": cfg["default_scene"], "norse": bool(cfg["norse_days"]), "boardSync": bool(cfg["board_sync"]),
-        "setupDone": bool(cfg["setup_done"]), "local": local, "govee": bool(cfg.get("govee_enabled")),
+        "setupDone": bool(cfg["setup_done"]), "local": local, "govee": bool(cfg.get("govee_enabled")), "version": VERSION,
     }
     if local and cfg.get("ha_token"):
         out["haToken"] = cfg["ha_token"]  # only ever sent to a browser on this computer
@@ -318,6 +362,54 @@ class Handler(BaseHTTPRequestHandler):
             raise ValueError("Too big.")
         return json.loads(self.rfile.read(n).decode("utf-8") or "{}")
 
+    def phone_ok(self):
+        """This computer always; any other device only with a remembered-phone cookie (after typing the PIN)."""
+        if self.is_local():
+            return True
+        cfg = load_config()
+        if not cfg.get("remote_pin_hash"):
+            return False
+        return remote_pin.check_device(remote_pin.cookie_from_header(self.headers.get("Cookie")), cfg.get("remote_devices")) is not None
+
+    def send_page(self, code, html):
+        body = html.encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Frame-Options", "DENY")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def pin_wall(self, path):
+        """What a phone without the PIN sees."""
+        has_pin = bool(load_config().get("remote_pin_hash"))
+        if path.startswith("/api/") or path in ("/config.js",) or not (path == "/" or path.endswith(".html") or path == "/pin"):
+            return self.send_json(401, {"error": "Type the phone PIN first.", "pin": True})
+        return self.send_page(200 if has_pin else 403, remote_pin.PIN_PAGE if has_pin else remote_pin.NO_PIN_PAGE)
+
+    def pin_login(self, body):
+        cfg = load_config()
+        if not cfg.get("remote_pin_hash"):
+            return self.send_json(403, {"ok": False, "message": "No phone PIN is set yet. Set one on the Valhalla computer (Setup > Phones & board)."})
+        wait = PIN_LOCK.wait()
+        if wait:
+            return self.send_json(429, {"ok": False, "message": "Too many wrong PINs. Try again in %d minute%s." % ((wait + 59) // 60, "" if wait <= 60 else "s"), "wait": wait})
+        if not remote_pin.verify_pin(str(body.get("pin", "")), cfg["remote_pin_hash"]):
+            left = PIN_LOCK.failed()
+            if left:
+                return self.send_json(401, {"ok": False, "message": "Wrong PIN. %d tr%s left before a 5-minute lock." % (left, "y" if left == 1 else "ies"), "left": left})
+            return self.send_json(429, {"ok": False, "message": "Too many wrong PINs. PIN entry is locked for 5 minutes.", "wait": remote_pin.LOCK_SECONDS})
+        PIN_LOCK.succeeded()
+        value, rec = remote_pin.new_device(body.get("name", ""))
+
+        def fn(cur):
+            devs = [d for d in (cur.get("remote_devices") or []) if isinstance(d, dict)]
+            cur["remote_devices"] = (devs + [rec])[-remote_pin.MAX_DEVICES:]
+        update_private(fn)
+        print("A phone typed the right PIN and is now remembered (%s)." % rec["name"])
+        return self.send_json(200, {"ok": True}, {"Set-Cookie": remote_pin.set_cookie_header(value)})
+
     def origin_ok(self):
         o = self.headers.get("Origin")
         return (not o) or o.split("//", 1)[-1].lower() == (self.headers.get("Host") or "").lower()
@@ -327,6 +419,10 @@ class Handler(BaseHTTPRequestHandler):
         if not self.host_ok():
             return self.send_json(403, {"error": "Unknown host name."})
         path = self.path.split("?", 1)[0]
+        if not self.phone_ok():
+            return self.pin_wall(path)
+        if path == "/pin":
+            return self.send_page(200, remote_pin.PIN_PAGE)
         if path == "/config.js":
             CFG = load_config()
             body = ("window.VALHALLA_CONFIG = " + json.dumps(public_config(CFG, self.is_local())) + ";\n").encode()
@@ -369,6 +465,10 @@ class Handler(BaseHTTPRequestHandler):
             body = self.read_json()
         except ValueError as e:
             return self.send_json(400, {"error": str(e)})
+        if path == "/api/pin":
+            return self.pin_login(body if isinstance(body, dict) else {})
+        if not self.phone_ok():
+            return self.pin_wall(path)
         if path.startswith("/api/setup/"):
             if not self.is_local():
                 return self.send_json(403, {"error": "Setup only works on the wall-screen computer itself."})
@@ -377,6 +477,11 @@ class Handler(BaseHTTPRequestHandler):
                 CFG = load_config()
                 GOVEE.configure(CFG)
                 return self.send_json(200 if res["ok"] else 400, res)
+            if path == "/api/setup/pin":
+                res = set_pin(str((body if isinstance(body, dict) else {}).get("pin", "")).strip())
+                return self.send_json(200 if res["ok"] else 400, res)
+            if path == "/api/setup/forget-phones":
+                return self.send_json(200, forget_devices())
             if path == "/api/setup/test-govee":
                 cfg = load_config()
                 ips = body.get("govee_lan_ips", cfg.get("govee_lan_ips") or [])
@@ -509,7 +614,8 @@ def main():
     print("Valhalla is running:  http://127.0.0.1:%d/   (%s%s)" % (port, "pretend devices" if CFG["adapter"] == "mock" else "Home Assistant",
                                                              ", Govee lights: " + GOVEE.mode() if CFG.get("govee_enabled") else ""))
     if len(servers) > 1:
-        print("Phones on your Tailscale: http://%s:%d/" % (CFG["remote_listen"], port))
+        print("Phones on your Tailscale: http://%s:%d/  (%s)" % (CFG["remote_listen"], port,
+              "phone PIN on" if CFG.get("remote_pin_hash") else "locked: set a phone PIN in Setup > Phones & board"))
     print("Press Ctrl+C to stop.")
     try:
         servers[0].serve_forever()
