@@ -1,0 +1,82 @@
+VALHALLA - FIX IT YOURSELF
+==========================
+A plain-words guide for when something goes wrong. You don't need to know any code.
+Valhalla is the page at  http://127.0.0.1:8795  (type that into your web browser if a shortcut ever fails).
+
+Where Valhalla lives
+--------------------
+- Installed with Valhalla-Setup-2.0.0.exe: the program is in %LOCALAPPDATA%\Programs\Valhalla and your
+  settings (config.json = Govee key and other settings, data folder = the board, valhalla.log) are in
+  %APPDATA%\Valhalla.   (Paste either of those into the File Explorer address bar to open it.)
+- Running from a folder (start.bat): the program AND your settings are in that folder.
+- While Valhalla runs, its icon sits by the clock (you may need to click the ^ arrow to see it).
+  Right-click it for "Open Valhalla" or "Quit".
+- config.json holds your Govee key. Keep it private: don't share or upload it.
+
+
+1. THE PAGE WON'T LOAD ("Unable to connect")
+--------------------------------------------
+   a. Start menu > Valhalla. Wait 5 seconds; the page opens by itself.
+   b. If the Valhalla icon is already by the clock: right-click it > Quit, wait 5 seconds, then start it again.
+   c. Folder version: double-click start.bat and LEAVE the black window open (closing it stops Valhalla).
+   d. Still nothing? Restart the PC and try (a) again.
+   e. Wall screen shows a blank or "can't reach" page? The screen probably opened before Valhalla was ready.
+      Wait a few seconds and press F5 (or tap reload).
+
+
+2. I MADE A NEW GOVEE KEY (OR VALHALLA SAYS "THE API KEY IS WRONG")
+-----------------------------------------------------------------
+   Govee only allows one key at a time: making a new key switches the old one off.
+   a. Get the key: Govee Home app > Profile (bottom right) > Settings gear (top right) > Apply for API Key.
+      Govee e-mails it to you, usually within a few minutes.
+   b. In Valhalla: click the gear (Setup) > Govee lights. Paste the new key, press "Find my Govee lights",
+      then "Save & next" and "Finish".
+   Lights with LAN Control keep working even while the key is wrong. Only cloud lights and Govee's
+   animated scenes stop.
+
+
+3. WINDOWS ASKS ABOUT THE FIREWALL
+---------------------------------
+   The first time Valhalla looks for Govee lights, Windows asks "Allow Valhalla (or Python) on networks?".
+   Tick "Private networks", press Allow. That's all - nothing else in Windows Security needs changing.
+   Pressed "Cancel" by mistake? Start > type "Allow an app through Windows Firewall" > Change settings >
+   find Valhalla (or Python) > tick the "Private" box > OK. Then press "Find my Govee lights" again.
+   Your home Wi-Fi must be set to "Private": Windows Settings > Network & internet > your Wi-Fi > Private network.
+
+
+4. MY LIGHTS AREN'T FOUND / A LIGHT IS MISSING
+---------------------------------------------
+   Go down this list and stop when it works:
+   a. The light must be set up in the Govee Home app and work there first. Wi-Fi lights only -
+      Bluetooth-only Govee lights can't work with Valhalla.
+   b. Setup (gear) > Govee lights: "Use Govee lights" ticked? Key pasted? Press "Find my Govee lights".
+   c. The light and this PC must be on the SAME home network (not a guest network). Govee lights need 2.4 GHz Wi-Fi.
+   d. For the fast local control: Govee Home app > tap the light > gear (top right) > turn on "LAN Control".
+      No switch? Update the light's firmware there and wait a few minutes. Some models (most bulbs) have no LAN
+      and use the Govee cloud instead - that's fine, just a little slower.
+   e. Just added or renamed a light? Cloud lights can take up to 10 minutes to show up. Press
+      "Find my Govee lights" again, or wait and reload the page.
+   f. Some routers block the search. Give each light a fixed address in your router, then type the addresses into
+      Setup > Govee lights > "Light addresses" (for example 192.168.1.50, 192.168.1.51).
+   g. Error "could not listen on UDP port 4002": another Govee program (or Home Assistant's Govee add-on) is
+      running on this PC. Close it, or just use the cloud.
+
+
+5. START OVER / REINSTALL
+-------------------------
+   - Run Valhalla-Setup-2.0.0.exe again (it's also in your backup zip). It keeps your settings.
+   - Truly fresh start: Quit Valhalla (icon by the clock), uninstall it (Settings > Apps), rename
+     %APPDATA%\Valhalla to Valhalla-old, then install again. The Setup wizard opens; paste your Govee key again.
+   - To bring old settings back: Quit Valhalla, copy your saved config.json (and the data folder) into
+     %APPDATA%\Valhalla, start Valhalla.
+   - Settings saved wrong? Setup keeps the previous version as config.backup.json in the settings folder.
+     Quit Valhalla, rename config.json to config.broken.json, copy config.backup.json and rename the copy to
+     config.json, then start Valhalla.
+
+
+Still stuck?
+------------
+Write down: what you clicked, what you expected, what happened, and the time. The log file valhalla.log in
+the settings folder (open with Notepad) shows what Valhalla was doing at that time.
+
+Valhalla - built by The_Mead_Maker & Odin

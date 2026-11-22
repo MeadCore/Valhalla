@@ -1,0 +1,4 @@
+# Only for building Valhalla.exe on Windows (windows-app\build_exe.bat). Valhalla itself needs nothing extra.
+pyinstaller==6.22.3
+pystray
+pillow

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07090e">
+  <title>Valhalla</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23d4a64a'/%3E%3Ctext x='32' y='45' font-size='34' text-anchor='middle' fill='%2307090e' font-family='Arial' font-weight='bold'%3EV%3C/text%3E%3C/svg%3E">
+  <!-- Scenes first, so the saved scene is painted before the rest loads (no flash). -->
+  <script src="scenes.js"></script>
+  <script>
+  (function () {
+    try {
+      var q = new URLSearchParams(location.search).get("scene");
+      var pick = q || JSON.parse(localStorage.getItem("vh_scene") || '"auto"');
+      var s = (pick === "auto" || !VScenes.byId[pick]) ? VScenes.resolveAuto(new Date(), { norse: JSON.parse(localStorage.getItem("vh_norse") || "true") }).scene : VScenes.byId[pick];
+      VScenes.apply(s);
+    } catch (e) {}
+  })();
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo" aria-hidden="true"><span id="logoGlyph">ᛟ</span></span><span class="brand-name">Valhalla</span></div>
+    <div class="top-status" id="topStatus"></div>
+    <div class="top-actions">
+      <button type="button" class="hdr-chip" id="wxChip" title="Weather"><span class="wx-emoji">🌡️</span><span class="wx-temp">…</span></button>
+      <span class="clock" id="clock"></span>
+      <button type="button" class="btn ghost hdr-scene" id="sceneBtn" aria-haspopup="dialog" title="Scene: holiday colors for the screen (and, later, the lights)"></button>
+      <button type="button" class="btn ghost" id="presetBtn" aria-haspopup="menu" title="Layout preset"></button>
+      <button type="button" class="btn ghost" id="boxesBtn" aria-haspopup="menu" title="Show or hide boxes in this layout">▦ Boxes</button>
+      <button type="button" class="btn ghost" id="helpBtn" aria-haspopup="dialog" title="Help and how-to guides">❔ Help</button>
+      <button type="button" class="btn ghost js-open-setup" id="setupBtn" data-step="welcome" aria-haspopup="dialog" title="Setup wizard">⚙</button>
+      <button type="button" class="btn ghost hide-phone" id="fsBtn" title="Full screen (kiosk)">⛶</button>
+    </div>
+  </header>
+
+  <!-- House status strip (like Asgard's stats strip) -->
+  <section class="stats-strip" id="statusStrip" aria-label="House status"></section>
+
+  <main class="grid" id="grid" data-preset="home">
+    <section class="panel" id="box-cmd" data-box="cmd">
+      <div class="panel-head"><h2><span class="dot"></span>Command Center</h2><div class="head-actions"><span class="pill" id="modePill">Home</span></div></div>
+      <div class="panel-body" id="cmdBody"></div>
+    </section>
+
+    <section class="panel" id="box-cam" data-box="cam">
+      <div class="panel-head"><h2><span class="dot cams"></span>Cameras <span class="count" id="camCount"></span></h2>
+        <div class="head-actions"><button type="button" class="btn small ghost" id="camCycle" title="Show one camera at a time, switching every 8 seconds">⟳ Cycle</button></div></div>
+      <div class="panel-body cam-body" id="camBody"></div>
+    </section>
+
+    <section class="panel" id="box-clim" data-box="clim">
+      <div class="panel-head"><h2><span class="dot clim"></span>Climate</h2><div class="head-actions"><span class="muted tiny" id="climOut"></span></div></div>
+      <div class="panel-body clim-body" id="climBody"></div>
+    </section>
+
+    <section class="panel" id="box-lights" data-box="lights">
+      <div class="panel-head"><h2><span class="dot lights"></span>Lights <span class="count" id="lightCount"></span></h2>
+        <div class="head-actions"><button type="button" class="btn small ghost" id="lightsScene" title="Paint the color bulbs with the current scene's colors">🎨 Scene colors</button>
+          <button type="button" class="btn small ghost" id="lightsAllOff">All off</button></div></div>
+      <div class="panel-body" id="lightsBody"></div>
+    </section>
+
+    <section class="panel" id="box-garage" data-box="garage">
+      <div class="panel-head"><h2><span class="dot garage"></span>Garage</h2><div class="head-actions"><span class="pill" id="garagePill">…</span></div></div>
+      <div class="panel-body garage-body" id="garageBody"></div>
+    </section>
+
+    <section class="panel" id="box-cal" data-box="cal">
+      <div class="panel-head"><h2><span class="dot cal"></span>Calendar</h2><div class="head-actions"><span class="muted tiny" id="calSrc"></span></div></div>
+      <div class="panel-body" id="calBody"></div>
+    </section>
+
+    <section class="panel" id="box-board" data-box="board">
+      <div class="panel-head"><h2><span class="dot board"></span>Board <span class="sync-pill local" id="boardSync">This screen only</span></h2>
+        <div class="head-actions board-tools" id="boardTools"></div></div>
+      <div class="board-wrap" id="boardWrap"><canvas id="boardCanvas" aria-label="Dry-erase board: draw with a finger or the mouse"></canvas></div>
+    </section>
+  </main>
+
+  <div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-box" id="modalBox"></div></div>
+  <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="config.js"></script>
+  <script src="adapters/mock.js"></script>
+  <script src="adapters/homeassistant.js"></script>
+  <script src="adapters/govee.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

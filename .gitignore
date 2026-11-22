@@ -1,0 +1,31 @@
+# Private, per-user files: never commit
+config.json
+config*.json
+!config.example.json
+config.json.tmp
+*session*.json
+*token*
+*.key
+.env
+data/
+board.json
+portable.txt
+windows-app/private-words.txt
+private-words.txt
+# Logs, old copies, temp files
+*.log
+*.log.*
+*.bak*
+*.bak-*
+*backup*
+*.tmp
+# Build output and tools
+venv/
+.venv/
+build/
+dist/
+Output/
+innosetup/
+*.spec
+__pycache__/
+*.pyc

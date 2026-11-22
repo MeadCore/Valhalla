@@ -1,0 +1,21 @@
+{
+  "_readme": "Valhalla settings. Easiest: use the Setup wizard (gear button) instead of editing this file. Copy to config.json (start.bat does it for you). No names, addresses or passwords belong here.",
+  "adapter": "mock",
+  "ha_url": "",
+  "ha_remote_url": "",
+  "ha_token": "",
+  "calendars": ["calendar.house"],
+  "weather_entity": "weather.home",
+  "default_preset": "home",
+  "default_scene": "auto",
+  "norse_days": true,
+  "board_sync": true,
+  "listen_port": 8795,
+  "remote_listen": "",
+  "setup_done": false,
+  "govee_enabled": false,
+  "govee_api_key": "",
+  "govee_lan": true,
+  "govee_lan_ips": [],
+  "govee_builtin_scenes": false
+}

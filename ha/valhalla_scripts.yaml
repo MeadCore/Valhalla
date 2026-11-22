@@ -1,0 +1,76 @@
+# Example Home Assistant scripts that Valhalla's Command Center buttons call.
+# Paste into Home Assistant's scripts.yaml (or build the same thing in Settings > Automations & Scenes > Scripts),
+# then change the entity ids to match your real devices. Nothing personal lives here.
+valhalla_all_off:
+  alias: "Valhalla - All off"
+  sequence:
+    - action: light.turn_off
+      target: { entity_id: all }
+
+valhalla_away:
+  alias: "Valhalla - Away"
+  sequence:
+    - action: light.turn_off
+      target: { entity_id: all }
+    - action: climate.set_temperature
+      target: { entity_id: [climate.main_floor, climate.upstairs] }
+      data: { temperature: 62 }
+    - action: cover.close_cover
+      target: { entity_id: cover.garage_door }
+    - action: input_select.select_option
+      target: { entity_id: input_select.house_mode }
+      data: { option: Away }
+
+valhalla_night:
+  alias: "Valhalla - Night"
+  sequence:
+    - action: light.turn_off
+      target: { entity_id: all }
+    - action: light.turn_on
+      target: { entity_id: light.hallway }
+      data: { brightness_pct: 10 }
+    - action: light.turn_on
+      target: { entity_id: light.front_porch }
+    - action: climate.set_temperature
+      target: { entity_id: climate.upstairs }
+      data: { target_temp_low: 66, target_temp_high: 74 }
+    - action: input_select.select_option
+      target: { entity_id: input_select.house_mode }
+      data: { option: Night }
+
+valhalla_lock_up:
+  alias: "Valhalla - Lock up"
+  sequence:
+    - action: cover.close_cover
+      target: { entity_id: cover.garage_door }
+    - action: light.turn_on
+      target: { entity_id: [light.front_porch, light.backyard] }
+    # Later: - action: lock.lock  target: { entity_id: all }
+
+valhalla_home:
+  alias: "Valhalla - Home"
+  sequence:
+    - action: input_select.select_option
+      target: { entity_id: input_select.house_mode }
+      data: { option: Home }
+
+# Paints the color bulbs with the current scene's colors. Valhalla sends: variables: { colors: ["#rrggbb", ...] }
+valhalla_scene_lights:
+  alias: "Valhalla - Scene colors on the lights"
+  fields:
+    colors: { description: "List of hex colors from the current scene" }
+  sequence:
+    - variables:
+        targets: [light.living_room, light.kitchen, light.front_porch]   # your color bulbs
+    - repeat:
+        for_each: "{{ targets }}"
+        sequence:
+          - action: light.turn_on
+            target: { entity_id: "{{ repeat.item }}" }
+            data:
+              rgb_color: >-
+                {% set h = colors[(repeat.index - 1) % (colors | length)] | replace('#','') %}
+                {{ [h[0:2] | int(base=16), h[2:4] | int(base=16), h[4:6] | int(base=16)] }}
+
+# Helper used by the Mode tile (Settings > Devices & services > Helpers > Dropdown):
+#   input_select.house_mode with options Home, Away, Night
