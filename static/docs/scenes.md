@@ -61,3 +61,12 @@ Paste it inside the `SCENES` list, save, and reload. It appears in the picker an
 ## Scene colors on the bulbs
 
 The **🎨 Scene colors** button in the Lights box sends the scene's `lights` colors to your color bulbs. See [Add the lights](#guide:lights). Govee lights get them straight from Valhalla, and can play Govee's own matching animated scene instead: see [Govee lights](#guide:govee-lights).
+
+## Your own themes (Asgard Theme Studio)
+
+Asgard Theme Studio is a free, point-and-click app for making your own look: colors, button and label styles, fonts, textures, a moving background, even your own picture.
+
+1. In Theme Studio, make your theme and press **💾 Save theme** (it goes to Documents › Asgard Themes).
+2. In Valhalla, tap the **scene button** at the top, then **⇧ Import theme…** under **Your themes**, and pick the file.
+
+Your theme then works like a scene: tap it to switch, and **🎨 Scene colors** sends its colors to the bulbs. Tap ✕ on its card twice to delete it. Themes are checked before use and can never contain code or links.

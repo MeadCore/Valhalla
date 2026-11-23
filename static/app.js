@@ -13,7 +13,7 @@
   };
   const Q = new URLSearchParams(location.search);
   // The one place the screen's version lives (❔ Help › About & updates compares it with the latest GitHub release).
-  const VALHALLA_VERSION = "2.1.0";
+  const VALHALLA_VERSION = "2.2.0";
   // GitHub "owner/repo" whose latest release is checked (https://api.github.com/repos/MeadCore/Valhalla/releases/latest).
   const UPDATE_REPO = "MeadCore/Valhalla";
   const CREDIT = "Created October 26, 2026 by The_Mead_Maker & Odin";
@@ -82,12 +82,17 @@
     current: null,
     resolve() {
       const norse = store.get("vh_norse", CFG.norse !== false);
+      const UT = window.VUserThemes, u = UT && /^u_/.test(this.pick) ? UT.byId(this.pick) : null, us = u && UT.scene(u);
+      if (us) return { scene: us, auto: false, user: u };   // one of your own themes (Asgard Theme Studio)
       if (this.pick !== "auto" && VScenes.byId[this.pick]) return { scene: VScenes.byId[this.pick], auto: false };
       const r = VScenes.resolveAuto(new Date(), { norse: norse });
       return { scene: r.scene, auto: true, occurrence: r.occurrence };
     },
     apply() {
-      const r = this.resolve(); this.current = r.scene; VScenes.apply(r.scene);
+      const r = this.resolve(); this.current = r.scene;
+      if (window.VUserThemes) window.VUserThemes.clear();
+      VScenes.apply(r.scene);
+      if (r.user) window.VUserThemes.paint(r.user);
       $("logoGlyph").textContent = r.scene.glyph === "ᛟ" ? "ᛟ" : r.scene.glyph;
       $("sceneBtn").innerHTML = '<span class="sc-glyph" aria-hidden="true">' + esc(r.scene.glyph) + '</span><span class="sc-name">' + esc(r.scene.name) + "</span>" +
         (r.auto ? '<span class="sc-auto">auto</span>' : "") + '<span class="caret" aria-hidden="true">▾</span>';
@@ -107,15 +112,53 @@
       const groups = [["Everyday", ["valhalla"]], ["Civic", ["rwb"]], ["Wheel of the Year", ["samhain", "yule", "imbolc", "ostara", "beltane", "litha", "lughnasadh", "mabon"]], ["Norse", ["winternights", "disting"]]];
       const known = new Set(groups.flatMap((g) => g[1])), own = VScenes.list.filter((x) => !known.has(x.id)).map((x) => x.id);
       if (own.length) groups.push(["Your own", own]); // scenes you add to scenes.js show up here
+      const UT = window.VUserThemes, mine = UT ? UT.list() : [];
+      const userCard = (u) => { const s = UT.scene(u); if (!s) return "";
+        return '<span class="ut-wrap"><button type="button" class="sc-card' + (this.pick === u.id ? " on" : "") + '" data-scene="' + esc(u.id) + '">' +
+          '<span class="sc-card-top"><span class="sc-glyph">🎨</span><b>' + esc(u.name) + "</b></span>" +
+          '<span class="sw">' + s.palette.map((p) => '<i style="background:' + esc(p[0]) + '" title="' + esc(p[1]) + '"></i>').join("") + "</span>" +
+          '<span class="sc-sub">' + esc(s.blurb) + "</span></button>" +
+          '<button type="button" class="ut-del" data-del="' + esc(u.id) + '" title="Delete this theme" aria-label="Delete theme ' + esc(u.name) + '">✕</button></span>'; };
+      const yours = UT ? '<div class="sp-group">Your themes</div>' + (mine.length ? '<div class="sp-grid">' + mine.map(userCard).join("") + "</div>" : "") +
+        '<p class="muted tiny">Make your own look in Asgard Theme Studio, save it, then add the .asgard-theme file here. ' +
+        '<button type="button" class="btn small ghost" data-act="ut-import">⇧ Import theme…</button></p>' : "";
       const html = '<div class="sp-head"><h3 id="modalTitle">Scene</h3><button type="button" class="btn ghost" data-close>✕</button></div>' +
         '<p class="muted">Scenes recolor this screen now. After the smart bulbs arrive, the same scene paints the color lights.</p>' +
         '<button type="button" class="sc-card sc-auto-card' + (this.pick === "auto" ? " on" : "") + '" data-scene="auto"><span class="sc-card-top"><span class="sc-glyph">🗓</span><b>Auto by date</b></span>' +
         '<span class="sc-sub">Changes by itself on each holiday. Today: ' + esc(auto.glyph + " " + auto.name) + "</span></button>" +
         '<label class="sp-norse"><input type="checkbox" id="spNorse"' + (store.get("vh_norse", CFG.norse !== false) ? " checked" : "") + '> Include the Norse days (Winter Nights, Disting) in Auto</label>' +
-        groups.map(([g, list]) => '<div class="sp-group">' + esc(g) + '</div><div class="sp-grid">' + list.map((id) => card(VScenes.byId[id], id === "valhalla" ? VScenes.byId[id].blurb : null)).join("") + "</div>").join("");
+        groups.map(([g, list]) => '<div class="sp-group">' + esc(g) + '</div><div class="sp-grid">' + list.map((id) => card(VScenes.byId[id], id === "valhalla" ? VScenes.byId[id].blurb : null)).join("") + "</div>").join("") + yours;
       const close = openModal(html, "scene-picker");
-      $("modalBox").addEventListener("click", (e) => { const b = e.target.closest("[data-scene]"); if (b) { this.set(b.dataset.scene); close(); } });
+      $("modalBox").addEventListener("click", (e) => {
+        const d = e.target.closest("[data-del]");
+        if (d) {
+          if (!d.classList.contains("confirm")) { d.classList.add("confirm"); d.textContent = "Delete?"; return; }
+          UT.remove(d.dataset.del); if (this.pick === d.dataset.del) this.set("auto"); close(); this.picker(); toast("Theme deleted"); return;
+        }
+        if (e.target.closest('[data-act="ut-import"]')) { this.importTheme(() => { close(); }); return; }
+        const b = e.target.closest("[data-scene]"); if (b) { this.set(b.dataset.scene); close(); } });
       $("spNorse").addEventListener("change", (e) => { store.set("vh_norse", e.target.checked); this.apply(); close(); this.picker(); });
+    },
+    // Import a .asgard-theme file (checked by theme-kit.js; the picture is re-drawn) and switch to it.
+    importTheme(done) {
+      const UT = window.VUserThemes; if (!UT) return;
+      const i = document.createElement("input");
+      i.type = "file"; i.accept = ".asgard-theme,.json,application/json"; i.style.display = "none";
+      i.addEventListener("change", () => {
+        const f = i.files && i.files[0]; i.remove(); if (!f) return;
+        if (f.size > UT.limit) { toast("That theme file is too big (the limit is 1.5 MB).", true); return; }
+        const r = new FileReader();
+        r.onload = async () => {
+          const res = await UT.add(String(r.result || ""));
+          if (res.err) { toast(res.err, true); return; }
+          if (done) done();
+          this.set(res.entry.id);
+          toast("Theme “" + res.entry.name + "” added." + (res.lostPicture ? " Its picture couldn't be kept." : ""));
+        };
+        r.onerror = () => toast("Couldn't read that file.", true);
+        r.readAsText(f);
+      });
+      document.body.appendChild(i); i.click();
     },
     init() {
       $("sceneBtn").addEventListener("click", () => this.picker());

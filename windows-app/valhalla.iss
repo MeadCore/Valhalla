@@ -1,7 +1,7 @@
 ; Valhalla per-user installer (Inno Setup 6). No admin needed; installs to %LOCALAPPDATA%\Programs\Valhalla.
 ; Built by The_Mead_Maker & Odin, the same way as Asgard's installer.
 #ifndef AppVer
-  #define AppVer "2.1.0"
+  #define AppVer "2.2.0"
 #endif
 [Setup]
 AppId={{8B16942A-86B6-48DB-A598-3506C101623B}

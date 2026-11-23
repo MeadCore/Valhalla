@@ -1,5 +1,9 @@
 # What's new in Valhalla
 
+## 2.2.0 (November 23, 2026)
+
+- **Your own themes.** Make a look in [Asgard Theme Studio](https://github.com/MeadCore/Asgard-Theme-Studio) (free, no code), save it, then tap the scene button › **Import theme…**. It shows up under **Your themes** with colours, button and label styles, fonts, textures, a moving background and your own picture. Its colours also paint the color lights like a scene. Themes are checked before use and never contain code or links.
+
 ## 2.1.0 (November 22, 2026)
 
 - **Phone PIN.** Phones and tablets that open Valhalla over Tailscale now have to type a PIN (4 to 8 digits) once. After that the phone is remembered. Five wrong tries lock PIN entry for 5 minutes. The wall-screen PC itself never needs the PIN. Set it in ⚙ Setup → Phones & board. Valhalla won't turn on phone access until a PIN is set.

@@ -2,7 +2,7 @@
 
 Valhalla follows the Asgard gaming dashboard. It uses the same look and the same "boxes and presets" layout, and it is set up for running the house: cameras, thermostats, garage, lights, a family calendar and a dry-erase board.
 
-**Version 2.1** (phone PIN, update check, kiosk without Edge; see [CHANGELOG.md](CHANGELOG.md)). Home: <https://github.com/MeadCore/Valhalla>. **Status: design mockup.** It runs on **pretend devices** today, and Govee lights work for real once you have them (tested against a pretend Govee, not yet real lights). No smart-home hardware or software is needed to try it, and nothing in this folder is personal. There are no names, addresses, passwords or tokens, so it is safe to share.
+**Version 2.2** (your own themes from [Asgard Theme Studio](https://github.com/MeadCore/Asgard-Theme-Studio); see [CHANGELOG.md](CHANGELOG.md)). Home: <https://github.com/MeadCore/Valhalla>. **Status: design mockup.** It runs on **pretend devices** today, and Govee lights work for real once you have them (tested against a pretend Govee, not yet real lights). No smart-home hardware or software is needed to try it, and nothing in this folder is personal. There are no names, addresses, passwords or tokens, so it is safe to share.
 
 ## Start here
 

@@ -1,0 +1,119 @@
+/* Asgard Theme Kit (theme format v2) styles - Created November 22, 2026 by The_Mead_Maker & Odin.
+   Copyright (c) 2026 The_Mead_Maker & Odin. MIT License, see LICENSE. Keep this notice.
+   Shared, unchanged, by Asgard, Valhalla and Asgard Theme Studio. theme-kit.js only ever sets whitelisted names in
+   data-tk-* attributes on <html>, plus a few CSS variables built from whitelisted values; every look lives here.
+   Targets the class names Asgard and Valhalla share: .panel, .panel-head h2, .btn, .hdr-chip, .pill, .brand-name, .logo. */
+
+/* ---------- Fonts (built-in Windows fonts only) ---------- */
+:root[data-tk-font-t] body, :root[data-tk-font-t] .btn, :root[data-tk-font-t] input, :root[data-tk-font-t] select { font-family: var(--tk-font-t); }
+:root[data-tk-font-h] .panel-head h2, :root[data-tk-font-h] .brand-name, :root[data-tk-font-h] h1, :root[data-tk-font-h] h3 { font-family: var(--tk-font-h); }
+:root[data-tk-font-h="bold"] .panel-head h2, :root[data-tk-font-h="gothic"] .panel-head h2, :root[data-tk-font-h="marker"] .panel-head h2 { font-weight: 400; letter-spacing: 1px; font-size: 16px; }
+
+/* ---------- Buttons & labels: Rounded pills ---------- */
+:root[data-tk-btn="pill"] .btn, :root[data-tk-btn="pill"] .hdr-chip { border-radius: 999px; padding-left: 16px; padding-right: 16px; }
+:root[data-tk-btn="pill"] .panel-head h2 { background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--text); padding: 3px 14px; border-radius: 999px; }
+
+/* ---------- Stickers & tape (the Gachiakuta look) ---------- */
+:root[data-tk-btn="sticker"] .panel { border: 2px solid #120c07; border-radius: 4px 12px 5px 14px; box-shadow: 5px 5px 0 #120c07, 8px 8px 0 var(--accent); overflow: visible; }
+:root[data-tk-btn="sticker"] .panel-head { border-bottom: 2px dashed color-mix(in srgb, var(--text) 25%, transparent); overflow: visible; }
+:root[data-tk-btn="sticker"] .panel-head h2 { position: relative; background: #f1e4c3; color: #1a120b; padding: 4px 14px 3px; transform: rotate(-2deg);
+  box-shadow: 3px 3px 0 var(--accent); border-radius: 2px 6px 3px 5px; font-weight: 800; }
+:root[data-tk-btn="sticker"] .panel-head h2::after { content: ""; position: absolute; top: -9px; left: 50%; width: 48px; height: 16px; margin-left: -24px;
+  background: rgba(236, 224, 186, .72); transform: rotate(5deg); box-shadow: 0 1px 2px rgba(0,0,0,.35); pointer-events: none; }
+:root[data-tk-btn="sticker"] .panel:nth-child(2n) .panel-head h2 { transform: rotate(1.6deg); background: var(--accent2); color: #120c07; }
+:root[data-tk-btn="sticker"] .panel:nth-child(3n) .panel-head h2 { transform: rotate(-.8deg); background: var(--accent); color: var(--on-accent); }
+:root[data-tk-btn="sticker"] .panel-head h2 .count { color: inherit; opacity: .75; }
+:root[data-tk-btn="sticker"] .btn, :root[data-tk-btn="sticker"] .hdr-chip { border: 2px solid #120c07; border-radius: 3px 9px 4px 10px; background: #efe2bf; color: #1a120b;
+  box-shadow: 3px 3px 0 var(--accent); transform: rotate(-1deg); font-weight: 700; }
+:root[data-tk-btn="sticker"] .btn:nth-child(2n), :root[data-tk-btn="sticker"] .hdr-chip:nth-child(2n) { transform: rotate(1.2deg); }
+:root[data-tk-btn="sticker"] .btn:hover, :root[data-tk-btn="sticker"] .hdr-chip:hover { transform: rotate(0) translate(-1px, -1px); box-shadow: 4px 4px 0 var(--accent2); background: #fff3cf; color: #1a120b; }
+:root[data-tk-btn="sticker"] .pill { border: 2px solid #120c07; border-radius: 3px 9px 4px 10px; background: var(--accent2); color: #120c07; transform: rotate(-1.5deg); }
+
+/* ---------- Clipped corners (the Cyberpunk look): accent corners, second colour on hover ---------- */
+:root[data-tk-btn="clipped"] .panel { border-radius: 0; border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+  background: linear-gradient(225deg, var(--accent) 0 13px, transparent 13.5px), linear-gradient(45deg, var(--accent) 0 13px, transparent 13.5px),
+    linear-gradient(180deg, var(--panel2) 0%, var(--panel) 48px); }
+:root[data-tk-btn="clipped"] .panel:hover { background: linear-gradient(225deg, var(--accent2) 0 13px, transparent 13.5px), linear-gradient(45deg, var(--accent2) 0 13px, transparent 13.5px),
+    linear-gradient(180deg, var(--panel2) 0%, var(--panel) 48px); }
+:root[data-tk-btn="clipped"] .panel-head h2 { color: var(--accent); border-left: 4px solid var(--accent); padding-left: 8px; letter-spacing: 2px; }
+:root[data-tk-btn="clipped"] .btn, :root[data-tk-btn="clipped"] .hdr-chip { border-radius: 0; border: 1px solid var(--accent); color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent); text-transform: uppercase; letter-spacing: 1px;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); }
+:root[data-tk-btn="clipped"] .btn:hover, :root[data-tk-btn="clipped"] .hdr-chip:hover { border-color: var(--accent2); color: var(--accent2); background: color-mix(in srgb, var(--accent2) 16%, transparent); }
+:root[data-tk-btn="clipped"] .pill { border-radius: 0; border-color: var(--accent); color: var(--accent); clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px)); }
+
+/* ---------- Neon glow ---------- */
+:root[data-tk-btn="neon"] .panel { border-color: var(--accent); box-shadow: 0 0 calc(var(--fx-glow, 12px) + 6px) var(--accent-glow), inset 0 0 14px color-mix(in srgb, var(--accent) 18%, transparent); }
+:root[data-tk-btn="neon"] .panel-head h2 { color: var(--accent); text-shadow: 0 0 6px var(--accent-glow), 0 0 16px var(--accent-glow); }
+:root[data-tk-btn="neon"] .btn, :root[data-tk-btn="neon"] .hdr-chip { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent);
+  text-shadow: 0 0 6px var(--accent-glow); box-shadow: 0 0 10px var(--accent-glow), inset 0 0 8px color-mix(in srgb, var(--accent) 20%, transparent); }
+:root[data-tk-btn="neon"] .btn:hover, :root[data-tk-btn="neon"] .hdr-chip:hover { border-color: var(--accent2); color: var(--accent2); box-shadow: 0 0 16px color-mix(in srgb, var(--accent2) 60%, transparent); }
+:root[data-tk-btn="neon"] .pill { border-color: var(--accent2); color: var(--accent2); box-shadow: 0 0 8px color-mix(in srgb, var(--accent2) 45%, transparent); }
+
+/* ---------- Rose-gold edges (the Dark Romance look) ---------- */
+:root[data-tk-btn="rose-gold"] { --tk-rose: linear-gradient(135deg, #f6d9c9, #b76e79 38%, #e8b49a 68%, #8c4f5a); }
+:root[data-tk-btn="rose-gold"] .panel { border: 1px solid transparent;
+  background: linear-gradient(180deg, var(--panel2) 0%, var(--panel) 48px) padding-box, var(--tk-rose) border-box; box-shadow: 0 10px 34px rgba(0,0,0,.55), 0 0 18px rgba(232, 180, 154, .12); }
+:root[data-tk-btn="rose-gold"] .panel-head { border-bottom-color: rgba(232, 180, 154, .35); }
+:root[data-tk-btn="rose-gold"] .panel-head h2 { color: #f0c9b4; text-transform: none; letter-spacing: 1.2px; font-style: italic; font-weight: 500; }
+:root[data-tk-btn="rose-gold"] .btn, :root[data-tk-btn="rose-gold"] .hdr-chip { border: 1px solid transparent; color: #f6dccd;
+  background: linear-gradient(var(--panel2), var(--panel2)) padding-box, var(--tk-rose) border-box; }
+:root[data-tk-btn="rose-gold"] .btn:hover, :root[data-tk-btn="rose-gold"] .hdr-chip:hover { background: linear-gradient(color-mix(in srgb, #b76e79 22%, var(--panel2)), color-mix(in srgb, #b76e79 22%, var(--panel2))) padding-box, var(--tk-rose) border-box; }
+:root[data-tk-btn="rose-gold"] .pill { border-color: #c98f86; color: #f0c9b4; }
+
+/* ---------- Logo styles (the app name in the top-left) ---------- */
+:root[data-tk-logo] .brand-name { background: none; -webkit-background-clip: border-box; background-clip: border-box; -webkit-text-fill-color: currentColor; }
+:root[data-tk-logo="neon"] .brand-name { color: var(--accent); text-shadow: 0 0 6px var(--accent), 0 0 18px var(--accent-glow), 0 0 32px var(--accent-glow); letter-spacing: 1.5px; }
+:root[data-tk-logo="neon"] .logo { box-shadow: 0 0 10px var(--accent), 0 0 26px var(--accent-glow); }
+:root[data-tk-logo="glitch"] .brand-name { color: var(--text); text-transform: uppercase; letter-spacing: 3px; transform: skewX(-8deg);
+  text-shadow: -2px 0 var(--accent2), 2px 0 var(--accent); }
+:root[data-tk-logo="glitch"] .logo { border-radius: 0; clip-path: polygon(0 0, 75% 0, 100% 25%, 100% 100%, 25% 100%, 0 75%); }
+:root[data-tk-logo="sticker"] .brand-name { color: #1a120b; background: #f1e4c3; padding: 2px 12px 1px; transform: rotate(-3deg); box-shadow: 3px 3px 0 var(--accent);
+  text-transform: uppercase; font-weight: 900; letter-spacing: 1px; border-radius: 2px 7px 3px 6px; }
+:root[data-tk-logo="sticker"] .logo { border-radius: 4px 10px 5px 9px; border: 2px solid #120c07; transform: rotate(4deg); }
+:root[data-tk-logo="gold"] .brand-name { background: linear-gradient(180deg, #fff6d0 0%, #e7c26a 45%, #a3761f 55%, #f2d27e 100%); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent; letter-spacing: 2.5px; font-variant-caps: small-caps; }
+:root[data-tk-logo="chrome"] .brand-name { background: linear-gradient(180deg, #ffffff 0%, #c9d1de 44%, #39404e 50%, #9aa6ba 56%, #ffffff 100%); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent; font-style: italic; text-transform: uppercase; letter-spacing: 2px; font-weight: 900; }
+:root[data-tk-logo="stencil"] .brand-name { color: transparent; -webkit-text-fill-color: transparent; -webkit-text-stroke: 1.4px var(--accent); text-transform: uppercase; letter-spacing: 5px; font-weight: 900; }
+
+/* ---------- Textures (drawn here as tiny built-in patterns; nothing is downloaded) ---------- */
+:root[data-tk-tex="marble"] { --tk-tex-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004 .011' numOctaves='5' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .93  0 0 0 0 .92  0 0 0 0 .9  2.6 -1.2 -1.2 0 -.35'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23m)'/%3E%3C/svg%3E"); }
+:root[data-tk-tex="grunge"] { --tk-tex-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.018' numOctaves='4' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 .08  0 0 0 0 .05  0 0 0 0 .02  0 0 0 2.4 -1.05'/%3E%3C/filter%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 .95  0 0 0 0 .9  0 0 0 0 .8  0 0 0 3 -2.2'/%3E%3C/filter%3E%3Crect width='500' height='500' filter='url(%23g)'/%3E%3Crect width='500' height='500' filter='url(%23s)'/%3E%3C/svg%3E"); }
+:root[data-tk-tex="paper"] { --tk-tex-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 .96  0 0 0 0 .92  0 0 0 0 .84  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23p)'/%3E%3C/svg%3E"); }
+:root[data-tk-tex="carbon"] { --tk-tex-img: linear-gradient(27deg, #151515 5px, transparent 5px) 0 5px, linear-gradient(207deg, #151515 5px, transparent 5px) 10px 0px,
+  linear-gradient(27deg, #222 5px, transparent 5px) 0px 10px, linear-gradient(207deg, #222 5px, transparent 5px) 10px 5px, linear-gradient(90deg, #1b1b1b 10px, transparent 10px),
+  linear-gradient(#1d1d1d 25%, #1a1a1a 25%, #1a1a1a 50%, transparent 50%, transparent 75%, #242424 75%, #242424); }
+:root[data-tk-tex]::before { content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none; background: var(--tk-tex-img); opacity: calc(var(--tk-tex-strength, .5) * .7); }
+:root[data-tk-tex="carbon"]::before { background-size: 20px 20px; background-color: #131313; }
+:root[data-tk-tex="paper"]::before { mix-blend-mode: soft-light; opacity: calc(var(--tk-tex-strength, .5) * 1); }
+/* "Also on the boxes": a see-through veil of the box colour over the pattern sets how strong it looks. */
+:root[data-tk-tex-boxes] .panel { background-image: linear-gradient(color-mix(in srgb, var(--panel) calc(100% - var(--tk-tex-strength, .5) * 75%), transparent), color-mix(in srgb, var(--panel) calc(100% - var(--tk-tex-strength, .5) * 75%), transparent)), var(--tk-tex-img); background-color: var(--panel); }
+:root[data-tk-tex-boxes][data-tk-tex="carbon"] .panel { background-size: auto, 20px 20px; }
+:root[data-tk-tex-boxes][data-tk-btn="rose-gold"] .panel { background: linear-gradient(color-mix(in srgb, var(--panel) calc(100% - var(--tk-tex-strength, .5) * 75%), transparent), color-mix(in srgb, var(--panel) calc(100% - var(--tk-tex-strength, .5) * 75%), transparent)) padding-box, var(--tk-tex-img) padding-box, var(--tk-rose) border-box; }
+
+/* ---------- Your picture ---------- */
+.tk-art { pointer-events: none; }
+.tk-art-bg { position: fixed; inset: 0; z-index: -3; }
+.tk-art-bg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tk-art-bg::after { content: ""; position: absolute; inset: 0; background: var(--bg); opacity: var(--tk-dim, .45); }
+.tk-art-sticker { position: fixed; z-index: 40; width: var(--tk-st-size, 180px); transform: rotate(var(--tk-st-tilt, 0deg)); filter: drop-shadow(3px 5px 6px rgba(0,0,0,.55)); }
+.tk-art-sticker img { width: 100%; height: auto; display: block; }
+.tk-art-sticker.tk-c-top-left { top: 64px; left: 16px; }
+.tk-art-sticker.tk-c-top-right { top: 64px; right: 16px; }
+.tk-art-sticker.tk-c-bottom-left { bottom: 16px; left: 16px; }
+.tk-art-sticker.tk-c-bottom-right { bottom: 16px; right: 16px; }
+:root[data-lite] .tk-art-sticker { display: none; }
+@media print { .tk-art, :root[data-tk-tex]::before { display: none; } }
+
+/* ---------- Button colours win over the host app's own header/ghost button rules ---------- */
+:root[data-tk-btn="sticker"] .btn, :root[data-tk-btn="sticker"] .hdr-chip { background: #efe2bf !important; color: #1a120b !important; border: 2px solid #120c07 !important; border-radius: 3px 9px 4px 10px !important; }
+:root[data-tk-btn="sticker"] .btn:hover, :root[data-tk-btn="sticker"] .hdr-chip:hover { background: #fff3cf !important; }
+:root[data-tk-btn="clipped"] .btn, :root[data-tk-btn="clipped"] .hdr-chip { background: color-mix(in srgb, var(--accent) 12%, transparent) !important; color: var(--accent) !important; border: 1px solid var(--accent) !important; border-radius: 0 !important; }
+:root[data-tk-btn="clipped"] .btn:hover, :root[data-tk-btn="clipped"] .hdr-chip:hover { background: color-mix(in srgb, var(--accent2) 16%, transparent) !important; color: var(--accent2) !important; border-color: var(--accent2) !important; }
+:root[data-tk-btn="neon"] .btn, :root[data-tk-btn="neon"] .hdr-chip { background: color-mix(in srgb, var(--accent) 8%, transparent) !important; color: var(--accent) !important; border-color: var(--accent) !important; }
+:root[data-tk-btn="neon"] .btn:hover, :root[data-tk-btn="neon"] .hdr-chip:hover { color: var(--accent2) !important; border-color: var(--accent2) !important; }
+:root[data-tk-btn="rose-gold"] .btn, :root[data-tk-btn="rose-gold"] .hdr-chip { background: linear-gradient(var(--panel2), var(--panel2)) padding-box, var(--tk-rose) border-box !important; color: #f6dccd !important; border: 1px solid transparent !important; }
+:root[data-tk-btn="rose-gold"] .btn:hover, :root[data-tk-btn="rose-gold"] .hdr-chip:hover { background: linear-gradient(color-mix(in srgb, #b76e79 22%, var(--panel2)), color-mix(in srgb, #b76e79 22%, var(--panel2))) padding-box, var(--tk-rose) border-box !important; }
+:root[data-tk-btn="pill"] .btn, :root[data-tk-btn="pill"] .hdr-chip { border-radius: 999px !important; }

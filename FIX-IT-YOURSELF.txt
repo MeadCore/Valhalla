@@ -5,7 +5,7 @@ Valhalla is the page at  http://127.0.0.1:8795  (type that into your web browser
 
 Where Valhalla lives
 --------------------
-- Installed with Valhalla-Setup-2.1.0.exe: the program is in %LOCALAPPDATA%\Programs\Valhalla and your
+- Installed with Valhalla-Setup-2.2.0.exe: the program is in %LOCALAPPDATA%\Programs\Valhalla and your
   settings (config.json = Govee key and other settings, data folder = the board, valhalla.log) are in
   %APPDATA%\Valhalla.   (Paste either of those into the File Explorer address bar to open it.)
 - Running from a folder (start.bat): the program AND your settings are in that folder.
@@ -85,7 +85,7 @@ Where Valhalla lives
 
 7. START OVER / REINSTALL
 -------------------------
-   - Run Valhalla-Setup-2.1.0.exe again (it's also in your backup zip). It keeps your settings.
+   - Run Valhalla-Setup-2.2.0.exe again (it's also in your backup zip). It keeps your settings.
    - Truly fresh start: Quit Valhalla (icon by the clock), uninstall it (Settings > Apps), rename
      %APPDATA%\Valhalla to Valhalla-old, then install again. The Setup wizard opens; paste your Govee key again.
    - To bring old settings back: Quit Valhalla, copy your saved config.json (and the data folder) into

@@ -37,7 +37,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import govee
 import remote_pin
 
-VERSION = "2.1.0"
+VERSION = "2.2.0"
 BASE = os.path.dirname(os.path.abspath(__file__))
 # Where settings and the board live. Normally this folder; the Windows app (Valhalla.exe) points it at
 # %APPDATA%\Valhalla with VALHALLA_DATA_DIR so the program folder can stay read-only (see appdata.py).
